@@ -1,0 +1,11 @@
+{
+  "name": "gallerme-backend",
+  "version": "1.0.0",
+  "description": "Backend for GallerMe",
+  "main": "server.js",
+  "author": "Jack Nolan",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
