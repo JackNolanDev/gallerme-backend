@@ -6,6 +6,9 @@
   "author": "Jack Nolan",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "pg": "^8.7.1",
+    "uuid": "^8.3.2"
   }
 }
