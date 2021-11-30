@@ -14,7 +14,7 @@ const getAllArt = (req, res) => {
 const getArtById = (req, res) => {
     // need to validate user is logged in probably
     const id = req.params.id;
-    if (validateID(res, id)) {
+    if (serviceUtil.validateID(res, id)) {
         return;
     }
     artDao.findArtById(id)
@@ -31,7 +31,7 @@ const createArt = (req, res) => {
     if (!art.user_id || !art.name || !art.size || !art.data) {
         res.sendStatus(400);
     }
-    if (validateID(res, art.user_id)) {
+    if (serviceUtil.validateID(res, art.user_id)) {
         return;
     }
     artDao.createArt(art)
@@ -48,7 +48,7 @@ const updateArt = (req, res) => {
     if (!art.name || !art.id) {
         res.sendStatus(400);
     }
-    if (validateID(res, art.id)) {
+    if (serviceUtil.validateID(res, art.id)) {
         return;
     }
     artDao.updateArt(art)
@@ -62,7 +62,7 @@ const updateArt = (req, res) => {
 const deleteArt = (req, res) => {
     // need to validate logged in & id matches user's id - otherwise is admin
     const id = req.params.id;
-    if (validateID(res, id)) {
+    if (serviceUtil.validateID(res, id)) {
         return;
     }
     artDao.deleteArt(id)

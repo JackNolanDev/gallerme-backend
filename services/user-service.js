@@ -14,7 +14,7 @@ const getAllUsers = (req, res) => {
 const getUserById = (req, res) => {
     // need to validate user is logged in probably
     const id = req.params.id;
-    if (validateID(res, id)) {
+    if (serviceUtil.validateID(res, id)) {
         return;
     }
     userDao.findUserById(id)
@@ -51,7 +51,7 @@ const updateUser = (req, res) => {
         res.sendStatus(400);
         return;
     }
-    if (validateID(res, user.id)) {
+    if (serviceUtil.validateID(res, user.id)) {
         return;
     }
     userDao.updateUser(user)
@@ -66,7 +66,7 @@ const deleteUser = (req, res) => {
     // need to validate logged in & id matches user's id - otherwise is admin
     // if regular user, end their session
     const id = req.params.id;
-    if (validateID(res, id)) {
+    if (serviceUtil.validateID(res, id)) {
         return;
     }
     userDao.deleteUser(id)

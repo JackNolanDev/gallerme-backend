@@ -14,7 +14,7 @@ const getAllColors = (req, res) => {
 const getColorById = (req, res) => {
     // need to validate user is logged in probably
     const id = req.params.id;
-    if (validateID(res, id)) {
+    if (serviceUtil.validateID(res, id)) {
         return;
     }
     colorDao.findColorById(id)
@@ -32,7 +32,7 @@ const createColor = (req, res) => {
     if (!color.user_id || !color.name || !color.color) {
         res.sendStatus(400);
     }
-    if (validateID(res, color.user_id)) {
+    if (serviceUtil.validateID(res, color.user_id)) {
         return;
     }
     colorDao.createColor(color)
@@ -49,7 +49,7 @@ const updateColor = (req, res) => {
     if (!color.name || !color.id) {
         res.sendStatus(400);
     }
-    if (validateID(res, color.id)) {
+    if (serviceUtil.validateID(res, color.id)) {
         return;
     }
     colorDao.updateColor(color)
@@ -63,7 +63,7 @@ const updateColor = (req, res) => {
 const deleteColor = (req, res) => {
     // need to validate logged in & id matches user's id - otherwise is admin
     const id = req.params.id;
-    if (validateID(res, id)) {
+    if (serviceUtil.validateID(res, id)) {
         return;
     }
     colorDao.deleteColor(id)
