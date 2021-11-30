@@ -23,7 +23,7 @@ const findColorsByUserId = (user_id) => {
 const createColor = (color) => {
     return pool.query(
         "INSERT INTO colors (user_id, name, color) VALUES "
-        + "($1, $2, $3, $4) "
+        + "($1, $2, $3) "
         + "RETURNING id, user_id, name, color, creation_time",
         [color.user_id, color.name, color.color])
     .then(res => res.rows[0])
