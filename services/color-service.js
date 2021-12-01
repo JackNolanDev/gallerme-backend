@@ -75,7 +75,20 @@ const deleteColor = (req, res) => {
         res.sendStatus(500);
     });
 }
-
+/*
+const getColorsByUserId = (req, res) => {
+    const id = req.params.id;
+    if (serviceUtil.validateID(res, id)) {
+        return;
+    }
+    colorDao.findColorsByUserId(id)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+*/
 
 module.exports = (app) => {
     app.get("/api/colors", getAllColors);
@@ -83,4 +96,6 @@ module.exports = (app) => {
     app.post("/api/colors", createColor);
     app.put("/api/colors", updateColor);
     app.delete("/api/colors/:id", deleteColor);
+
+    //app.get("/api/users/:id/colors", getColorsByUserId);
 }
