@@ -31,10 +31,13 @@ const createColor = (req, res) => {
     const color = req.body;
     if (!color.user_id || !color.name || !color.color) {
         res.sendStatus(400);
-    }
-    if (serviceUtil.validateID(res, color.user_id)) {
         return;
     }
+
+    if (serviceUtil.validateUser(req, res, color.user_id)) {
+        return;
+    }
+
     colorDao.createColor(color)
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
@@ -48,10 +51,13 @@ const updateColor = (req, res) => {
     const color = req.body;
     if (!color.name || !color.id) {
         res.sendStatus(400);
-    }
-    if (serviceUtil.validateID(res, color.id)) {
         return;
     }
+    
+    if (serviceUtil.validateUser(req, res, color.user_id)) {
+        return;
+    }
+    
     colorDao.updateColor(color)
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
@@ -66,6 +72,9 @@ const deleteColor = (req, res) => {
     if (serviceUtil.validateID(res, id)) {
         return;
     }
+
+    // TODO: ADD PERMISSION TESTING SOMEHOW
+
     colorDao.deleteColor(id)
     // send 404 if color not found
     // shpuld maybe delete art && colors too?

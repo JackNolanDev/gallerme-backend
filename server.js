@@ -1,20 +1,10 @@
 const express = require('express');
 const session = require('express-session')
 
-const app = express();
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
 const isProd = process.env.NODE_ENV === "production";
 
-// SESSION init
-const secret = isProd ? process.env.SESSION_SECRET : "development secret";
-app.use(session({
-    resave: false,
-    saveUninitialized: true,
-    secret: 'any string'
-   }));
+// INIT EXPRESS
+const app = express();
 
 // CORS policy
 const origin = isProd ? process.env.WEBSITE_URL : "http://localhost:8080";
@@ -28,10 +18,23 @@ app.use(function(req, res, next) {
     next();
 });
 
+// BODY PARSER
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// INIT SESSION
+const secret = isProd ? process.env.SESSION_SECRET : "development secret";
+app.use(session({
+    resave: false,
+    saveUninitialized: true,
+    secret: secret
+   }));
+
 app.get('/ping', (req, res) => {
     res.send('pong');
 });
 
+require("./services/account-service")(app);
 require("./services/art-service")(app);
 require("./services/color-service")(app)
 require("./services/user-service")(app);

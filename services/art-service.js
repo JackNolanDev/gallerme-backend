@@ -2,7 +2,6 @@ const artDao = require("../daos/art-dao");
 const serviceUtil = require("../util/service-utils");
 
 const getAllArt = (req, res) => {
-    // need to validate user is admin probably
     artDao.findAllArt()
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
@@ -12,7 +11,6 @@ const getAllArt = (req, res) => {
 }
 
 const getArtById = (req, res) => {
-    // need to validate user is logged in probably
     const id = req.params.id;
     if (serviceUtil.validateID(res, id)) {
         return;
@@ -26,14 +24,16 @@ const getArtById = (req, res) => {
 }
 
 const createArt = (req, res) => {
-    // need to validate user is admin probably (regular users use signup?? E.g. starts session)
     const art = req.body;
     if (!art.user_id || !art.name || !art.size || !art.data) {
         res.sendStatus(400);
-    }
-    if (serviceUtil.validateID(res, art.user_id)) {
         return;
     }
+
+    if (serviceUtil.validateUser(req, res, art.user_id)) {
+        return;
+    }
+
     artDao.createArt(art)
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
@@ -45,12 +45,18 @@ const createArt = (req, res) => {
 const updateArt = (req, res) => {
     // need to validate logged in & id matches user's id - otherwise is admin
     const art = req.body;
-    if (!art.name || !art.id) {
+    if (!art.id || !art.user_id || !art.name) {
         res.sendStatus(400);
+        return;
     }
     if (serviceUtil.validateID(res, art.id)) {
         return;
     }
+
+    if (serviceUtil.validateUser(req, res, art.user_id)) {
+        return;
+    }
+
     artDao.updateArt(art)
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
@@ -65,6 +71,9 @@ const deleteArt = (req, res) => {
     if (serviceUtil.validateID(res, id)) {
         return;
     }
+
+    // TODO: ADD PERMISSION TESTING SOMEHOW
+
     artDao.deleteArt(id)
     // send 404 if art not found
     // shpuld maybe delete art && colors too?

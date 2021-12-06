@@ -1,4 +1,5 @@
 const pool = require("../util/postgres-pool");
+const serviceUtil = require("../util/service-utils");
 
 const findAllUsers = () => {
     return pool.query("SELECT id, username, email, role, first_name, last_name, date_of_birth FROM users")
@@ -42,11 +43,20 @@ const deleteUser = (id) => {
     return pool.query("DELETE FROM users WHERE id = $1", [id])
 }
 
-const login = (username, password) => {
-    // 1. get full row data for user
-    // 2. Hash password and compare with saved password
-    // 3. If it matches, set the user session with the ID
-    // possibly in a transaction for funsies
+const validateLogin = (user) => {
+    return pool.query("SELECT id, username, email, role, salt, password FROM users WHERE username = $1", [user.username])
+    .then(res => {
+        if (res.rows.length !== 1) {
+            // user not found - incorrect username
+            return false;
+        }
+        const userRow = res.rows[0];
+        if (serviceUtil.hashPassword(user.password, userRow.salt) === userRow.password) {
+            // username & password correct - DO NOT RETURN password or salt
+            return { id: userRow.id, username: userRow.username, email: userRow.email, role: userRow.role };
+        }
+        return false;
+    })
 }
 
 module.exports = {
@@ -55,5 +65,5 @@ module.exports = {
     createUser,
     updateUser,
     deleteUser,
-    login,
+    validateLogin,
 }
