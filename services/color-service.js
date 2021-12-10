@@ -11,6 +11,46 @@ const getAllColors = (req, res) => {
     });
 }
 
+const getColorsByUserId = (req, res) => {
+    const id = req.params.id;
+    if (serviceUtil.validateID(res, id)) {
+        return;
+    }
+    colorDao.findColorsByUserId(id)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
+const getColorsByArtId = (req, res) => {
+    const id = req.params.id;
+    if (serviceUtil.validateID(res, id)) {
+        return;
+    }
+    colorDao.findColorsByArtId(id)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
+const searchColors = (req, res) => {
+    const term = req.query.term;
+    if (term === undefined || term === "") {
+        res.sendStatus(400);
+        return;
+    }
+    colorDao.searchColors(term)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
 const getColorById = (req, res) => {
     // need to validate user is logged in probably
     const id = req.params.id;
@@ -18,7 +58,6 @@ const getColorById = (req, res) => {
         return;
     }
     colorDao.findColorById(id)
-    // send 404 if color not found
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
         console.error(e.stack);
@@ -84,27 +123,15 @@ const deleteColor = (req, res) => {
         res.sendStatus(500);
     });
 }
-/*
-const getColorsByUserId = (req, res) => {
-    const id = req.params.id;
-    if (serviceUtil.validateID(res, id)) {
-        return;
-    }
-    colorDao.findColorsByUserId(id)
-    .then(result => serviceUtil.success(res, result))
-    .catch(e => {
-        console.error(e.stack);
-        res.sendStatus(500);
-    });
-}
-*/
+
 
 module.exports = (app) => {
     app.get("/api/colors", getAllColors);
+    app.get("/api/colors/user/:id", getColorsByUserId);
+    app.get("/api/colors/art/:id", getColorsByArtId);
+    app.get("/api/colors/search", searchColors);
     app.get("/api/colors/:id", getColorById);
     app.post("/api/colors", createColor);
     app.put("/api/colors", updateColor);
     app.delete("/api/colors/:id", deleteColor);
-
-    //app.get("/api/users/:id/colors", getColorsByUserId);
 }

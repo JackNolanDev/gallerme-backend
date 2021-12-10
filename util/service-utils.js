@@ -10,8 +10,20 @@ const validateID = (res, id) => {
     return false;
 };
 
+const isAdmin = (req) => {
+    return !(req.session.user === undefined || req.session.user.role !== "ADMIN");
+}
+
+const isUserOrAdmin = (req, user_id) => {
+    return !(req.session.user === undefined || (req.session.user.id !== user_id && req.session.user.role !== "ADMIN"));
+}
+
+const isLoggedIn = (req) => {
+    return req.session.user !== undefined;
+}
+
 const validateAdmin = (req, res) => {
-    if (req.session.user === undefined || req.session.user.role !== "ADMIN") {
+    if (!isAdmin(req)) {
         res.sendStatus(403);
         return true;
     }
@@ -22,12 +34,20 @@ const validateUser = (req, res, user_id) => {
     if (validateID(res, user_id)) {
         return;
     }
-    if (req.session.user === undefined || (req.session.user.id !== user_id && req.session.user.role !== "ADMIN")) {
+    if (!isUserOrAdmin(req, user_id)) {
         res.sendStatus(403);
         return true;
     }
     return false;
 };
+
+const validateLoggedIn = (req, res) => {
+    if (!isLoggedIn(req)) {
+        res.sendStatus(403);
+        return true;
+    }
+    return false;
+}
 
 // sends success response
 const success = (res, val) => {
@@ -62,13 +82,26 @@ const hashPassword = (password, salt) => {
     return hash.digest("hex");
 }
 
+// grab the first result from a PSQL query or undefined
+const firstResult = (res) => {
+    if (res.rows.length > 0) {
+        return res.rows[0];
+    }
+    return undefined;
+}
+
 module.exports = {
     validateID,
+    isAdmin,
+    isUserOrAdmin,
+    isLoggedIn,
     validateAdmin,
     validateUser,
+    validateLoggedIn,
     success,
     successOnly,
     fail,
     generateSalt,
     hashPassword,
+    firstResult,
 }

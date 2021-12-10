@@ -1,19 +1,38 @@
 const pool = require("../util/postgres-pool");
 const serviceUtil = require("../util/service-utils");
 
-const findAllUsers = () => {
-    return pool.query("SELECT id, username, email, role, first_name, last_name, date_of_birth FROM users")
+// helper for getting columns in user table.
+// NOTE: This does NOT include the password or salt fields
+const getUserColumns = (includeHidden = true) => {
+    return includeHidden
+        ? " users.id, users.username, users.email, users.role, users.first_name, users.last_name, users.date_of_birth "
+        : " users.id, users.username, users.first_name, users.last_name ";
+}
+
+const findAllUsers = (includeHidden = true) => {
+    return pool.query("SELECT" + getUserColumns(includeHidden) + "FROM users")
     .then(res => res.rows)
 }
 
-const findUserById = (id) => {
-    return pool.query("SELECT id, username, email, role, first_name, last_name, date_of_birth FROM users WHERE id = $1", [id])
-    .then(res => {
-        if (res.rows.length > 0) {
-            return res.rows[0];
-        }
-        return undefined;
-    })
+const findUserById = (id, includeHidden = true) => {
+    return pool.query("SELECT" + getUserColumns(includeHidden) + "FROM users WHERE id = $1", [id])
+    .then(res => serviceUtil.firstResult(res))
+}
+
+const findUserByColorId = (color_id, includeHidden = true) => {
+    return pool.query(
+        "SELECT" + getUserColumns(includeHidden)
+        + "FROM users JOIN colors ON users.id = colors.user_id "
+        + "WHERE colors.id = $1", [color_id])
+    .then(res => serviceUtil.firstResult(res))
+}
+
+const findUserByArtId = (art_id, includeHidden = true) => {
+    return pool.query(
+        "SELECT" + getUserColumns(includeHidden)
+        + "FROM users JOIN art ON users.id = art.user_id "
+        + "WHERE art.id = $1", [art_id])
+    .then(res => serviceUtil.firstResult(res))
 }
 
 const createUser = (user) => {
@@ -31,29 +50,27 @@ const updateUser = (user) => {
         + "WHERE id = $7 "
         + "RETURNING id, username, email, role, first_name, last_name, date_of_birth",
         [user.username, user.email, user.role, user.first_name, user.last_name, user.date_of_birth, user.id])
-        .then(res => {
-            if (res.rows.length > 0) {
-                return res.rows[0];
-            }
-            return undefined;
-        })
+        .then(res => serviceUtil.firstResult(res))
 }
 
 const deleteUser = (id) => {
+    // TODO: update this to grab just the number of rows updated - if 0, return 404 in service
     return pool.query("DELETE FROM users WHERE id = $1", [id])
 }
 
 const validateLogin = (user) => {
-    return pool.query("SELECT id, username, email, role, salt, password FROM users WHERE username = $1", [user.username])
+    return pool.query("SELECT salt, password, " + getUserColumns() + "FROM users WHERE username = $1", [user.username])
     .then(res => {
         if (res.rows.length !== 1) {
             // user not found - incorrect username
             return false;
         }
-        const userRow = res.rows[0];
+        let userRow = res.rows[0];
         if (serviceUtil.hashPassword(user.password, userRow.salt) === userRow.password) {
             // username & password correct - DO NOT RETURN password or salt
-            return { id: userRow.id, username: userRow.username, email: userRow.email, role: userRow.role };
+            delete userRow.salt;
+            delete userRow.password;
+            return userRow;
         }
         return false;
     })
@@ -62,6 +79,8 @@ const validateLogin = (user) => {
 module.exports = {
     findAllUsers,
     findUserById,
+    findUserByColorId,
+    findUserByArtId,
     createUser,
     updateUser,
     deleteUser,

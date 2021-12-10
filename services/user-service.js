@@ -5,8 +5,35 @@ const getAllUsers = (req, res) => {
     if (serviceUtil.validateAdmin(req, res)) {
         return;
     }
-    // need to validate user is admin probably
-    userDao.findAllUsers()
+    // `showHidden` is true by default because this is an admin only endpoint
+    userDao.findAllUsers(true)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
+const getUserByArtId = (req, res) => {
+    const id = req.params.id;
+    if (serviceUtil.validateUser(req, res, id)) {
+        return;
+    }
+    userDao.findUserByArtId(id, serviceUtil.isUserOrAdmin(req, id))
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
+const getUserByColorId = (req, res) => {
+    const id = req.params.id;
+    // can only see user info when at least logged in
+    if (serviceUtil.validateLoggedIn(req, res)) {
+        return;
+    }
+    userDao.findUserByColorId(id, serviceUtil.isAdmin(req))
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
         console.error(e.stack);
@@ -15,13 +42,12 @@ const getAllUsers = (req, res) => {
 }
 
 const getUserById = (req, res) => {
-    // need to validate user is logged in probably
     const id = req.params.id;
-    if (serviceUtil.validateID(res, id)) {
+    // can only see user info when at least logged in
+    if (serviceUtil.validateLoggedIn(req, res)) {
         return;
     }
-    userDao.findUserById(id)
-    // send 404 if user not found
+    userDao.findUserById(id, serviceUtil.isAdmin(req))
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
         console.error(e.stack);
@@ -30,6 +56,7 @@ const getUserById = (req, res) => {
 }
 
 const createUser = (req, res) => {
+    // this endpoint is only for admins - there is a regular endpoint in `account-service.js`
     const user = req.body;
     if (!user.username || !user.password || !user.email || !user.role) {
         res.sendStatus(400);
@@ -99,6 +126,8 @@ const deleteUser = (req, res) => {
 
 module.exports = (app) => {
     app.get("/api/users", getAllUsers);
+    app.get("/api/users/art/:id", getUserByArtId);
+    app.get("/api/users/color/:id", getUserByColorId);
     app.get("/api/users/:id", getUserById);
     app.post("/api/users", createUser);
     app.put("/api/users", updateUser);

@@ -52,7 +52,7 @@ const logout = (req, res) => {
 }
 
 const currentUser = (req, res) => {
-    if (!req.session.user) {
+    if (!serviceUtil.isAdmin(req)) {
         serviceUtil.fail(res, "Not Logged In");
     } else {
         serviceUtil.success(res, req.session.user)

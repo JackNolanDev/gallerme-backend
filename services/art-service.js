@@ -10,6 +10,46 @@ const getAllArt = (req, res) => {
     });
 }
 
+const getArtByColorId = (req, res) => {
+    const id = req.params.id;
+    if (serviceUtil.validateID(res, id)) {
+        return;
+    }
+    artDao.findArtByColorId(id)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
+const getArtByUserId = (req, res) => {
+    const id = req.params.id;
+    if (serviceUtil.validateID(res, id)) {
+        return;
+    }
+    artDao.findArtByUserId(id)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
+const searchArt = (req, res) => {
+    const term = req.query.term;
+    if (term === undefined || term === "") {
+        res.sendStatus(400);
+        return;
+    }
+    artDao.searchArt(term)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
 const getArtById = (req, res) => {
     const id = req.params.id;
     if (serviceUtil.validateID(res, id)) {
@@ -86,6 +126,9 @@ const deleteArt = (req, res) => {
 
 module.exports = (app) => {
     app.get("/api/art", getAllArt);
+    app.get("/api/art/color/:id", getArtByColorId);
+    app.get("/api/art/user/:id", getArtByUserId);
+    app.get("/api/art/search", searchArt);
     app.get("/api/art/:id", getArtById);
     app.post("/api/art", createArt);
     app.put("/api/art", updateArt);

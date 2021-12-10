@@ -1,4 +1,5 @@
 const pool = require("../util/postgres-pool");
+const serviceUtil = require("../util/service-utils");
 
 const findAllColors = () => {
     return pool.query("SELECT id, user_id, name, color, creation_time FROM colors")
@@ -7,16 +8,26 @@ const findAllColors = () => {
 
 const findColorById = (id) => {
     return pool.query("SELECT id, user_id, name, color, creation_time FROM colors WHERE id = $1", [id])
-    .then(res => {
-        if (res.rows.length > 0) {
-            return res.rows[0];
-        }
-        return undefined;
-    })
+    .then(res => serviceUtil.firstResult(res))
 }
 
 const findColorsByUserId = (user_id) => {
     return pool.query("SELECT id, user_id, name, color, creation_time FROM colors WHERE user_id = $1", [user_id])
+    .then(res => res.rows)
+}
+
+const findColorsByArtId = (art_id) => {
+    return pool.query(
+        "SELECT colors.id, user_id, name, color, creation_time "
+        + "FROM colors JOIN color_art_index ON colors.id = color_art_index.color_id "
+        + "WHERE color_art_index.art_id = $1", [art_id])
+    .then(res => res.rows)
+}
+
+const searchColors = (term) => {
+    const wildcard_term = "%" + term + "%";
+    return pool.query("SELECT id, user_id, name, color, creation_time FROM colors WHERE name LIKE $1 LIMIT 50",
+        [wildcard_term])
     .then(res => res.rows)
 }
 
@@ -35,12 +46,7 @@ const updateColor = (color) => {
         + "WHERE id = $2 "
         + "RETURNING id, user_id, name, color, creation_time",
         [color.name, color.id])
-    .then(res => {
-        if (res.rows.length > 0) {
-            return res.rows[0];
-        }
-        return undefined;
-    })
+    .then(res => serviceUtil.firstResult(res))
 }
 
 const deleteColor = (id) => {
@@ -51,6 +57,8 @@ module.exports = {
     findAllColors,
     findColorById,
     findColorsByUserId,
+    findColorsByArtId,
+    searchColors,
     createColor,
     updateColor,
     deleteColor,

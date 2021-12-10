@@ -1,4 +1,5 @@
 const pool = require("../util/postgres-pool");
+const serviceUtil = require("../util/service-utils");
 
 const findAllArt = () => {
     return pool.query("SELECT id, user_id, name, size, data, creation_time FROM art")
@@ -7,16 +8,27 @@ const findAllArt = () => {
 
 const findArtById = (id) => {
     return pool.query("SELECT id, user_id, name, size, data, creation_time FROM art WHERE id = $1", [id])
-    .then(res => {
-        if (res.rows.length > 0) {
-            return res.rows[0];
-        }
-        return undefined;
-    })
+    .then(res => serviceUtil.firstResult(res))
 }
 
 const findArtByUserId = (user_id) => {
     return pool.query("SELECT id, user_id, name, size, data, creation_time FROM art WHERE user_id = $1", [user_id])
+    .then(res => res.rows)
+}
+
+const findArtByColorId = (color_id) => {
+    return pool.query(
+        "SELECT art.id, user_id, name, size, data, creation_time "
+        + "FROM art JOIN color_art_index ON art.id = color_art_index.art_id "
+        + "WHERE color_art_index.color_id = $1", [color_id])
+    .then(res => res.rows)
+}
+
+const searchArt = (term) => {
+    // TODO: increase search capacity to look at usernames / color names or possibly even limit by sizes etc.
+    const wildcard_term = "%" + term + "%";
+    return pool.query("SELECT id, user_id, name, size, data, creation_time FROM art WHERE name LIKE $1 LIMIT 50",
+        [wildcard_term])
     .then(res => res.rows)
 }
 
@@ -35,12 +47,7 @@ const updateArt = (art) => {
         + "WHERE id = $2 "
         + "RETURNING id, user_id, name, size, data, creation_time",
         [art.name, art.id])
-    .then(res => {
-        if (res.rows.length > 0) {
-            return res.rows[0];
-        }
-        return undefined;
-    })
+    .then(res => serviceUtil.firstResult(res))
 }
 
 const deleteArt = (id) => {
@@ -51,6 +58,8 @@ module.exports = {
     findAllArt,
     findArtById,
     findArtByUserId,
+    findArtByColorId,
+    searchArt,
     createArt,
     updateArt,
     deleteArt,
