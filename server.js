@@ -23,10 +23,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 
-if (isProd) {
-    // makes cookies work on heroku, I guess
-    app.enable("trust proxy");
-}
 
 
 // INIT SESSION
@@ -35,7 +31,6 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     secret,
-    proxy: true,
     cookie: {
         secure: false
     }
