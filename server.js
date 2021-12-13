@@ -36,7 +36,8 @@ app.use(session({
     store: new pgSession({
         pool,
         createTableIfMissing: true,
-      }),
+    }),
+    cookie: { httpOnly: true, secure: true, sameSite: "none" }
    }));
 
 app.get('/ping', (req, res) => {
