@@ -1,5 +1,8 @@
 const express = require('express');
+// save user sessions in database
 const session = require('express-session')
+const pgSession = require('connect-pg-simple')(session);
+const pool = require("./util/postgres-pool");
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -22,18 +25,16 @@ app.use(function(req, res, next) {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-
-
-
 // INIT SESSION
 const secret = isProd ? process.env.SESSION_SECRET : "development secret";
 app.use(session({
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     secret,
-    cookie: {
-        secure: false
-    }
+    store: new pgSession({
+        pool,
+        createTableIfMissing: true,
+      }),
    }));
 
 app.get('/ping', (req, res) => {
