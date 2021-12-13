@@ -37,7 +37,7 @@ app.use(session({
     secret,
     proxy: true,
     cookie: {
-        secure: isProd ? true : false
+        secure: false
     }
    }));
 
