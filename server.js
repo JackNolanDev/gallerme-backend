@@ -22,6 +22,11 @@ app.use(function(req, res, next) {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+if (isProd) {
+    // makes cookies work on heroku, I guess
+    app.set("trust proxy", 1);
+}
+
 // INIT SESSION
 const secret = isProd ? process.env.SESSION_SECRET : "development secret";
 app.use(session({
