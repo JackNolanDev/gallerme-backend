@@ -63,7 +63,8 @@ const currentUser = (req, res) => {
 
 const accountColors = (req, res) => {
     if (!serviceUtil.isLoggedIn(req)) {
-        res.success([]);
+        serviceUtil.success(res, [])
+        return;
     }
     colorDao.findColorsByUserId(req.session.user.id)
     .then(result => serviceUtil.success(res, result))
@@ -75,7 +76,8 @@ const accountColors = (req, res) => {
 
 const accountArt = (req, res) => {
     if (!serviceUtil.isLoggedIn(req)) {
-        res.success([]);
+        serviceUtil.success(res, [])
+        return;
     }
     artDao.findArtByUserId(req.session.user.id)
     .then(result => serviceUtil.success(res, result))
