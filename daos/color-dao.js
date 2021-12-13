@@ -26,7 +26,7 @@ const findColorsByArtId = (art_id) => {
 
 const searchColors = (term) => {
     const wildcard_term = "%" + term + "%";
-    return pool.query("SELECT id, user_id, name, color, creation_time FROM colors WHERE name LIKE $1 LIMIT 50",
+    return pool.query("SELECT id, user_id, name, color, creation_time FROM colors WHERE name ILIKE $1 LIMIT 50",
         [wildcard_term])
     .then(res => res.rows)
 }

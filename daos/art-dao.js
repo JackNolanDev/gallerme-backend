@@ -1,3 +1,4 @@
+const format = require('pg-format');
 const pool = require("../util/postgres-pool");
 const serviceUtil = require("../util/service-utils");
 
@@ -27,9 +28,14 @@ const findArtByColorId = (color_id) => {
 const searchArt = (term) => {
     // TODO: increase search capacity to look at usernames / color names or possibly even limit by sizes etc.
     const wildcard_term = "%" + term + "%";
-    return pool.query("SELECT id, user_id, name, size, data, creation_time FROM art WHERE name LIKE $1 LIMIT 50",
+    return pool.query("SELECT id, user_id, name, size, data, creation_time FROM art WHERE name ILIKE $1 LIMIT 50",
         [wildcard_term])
     .then(res => res.rows)
+}
+
+const linkArtToColor = (art_id, color_ids) => {
+    const id_pairs = color_ids.map(id => [id, art_id]);
+    return pool.query(format("INSERT INTO color_art_index (color_id, art_id) VALUES %L", id_pairs))
 }
 
 const createArt = (art) => {
@@ -39,6 +45,12 @@ const createArt = (art) => {
         + "RETURNING id, user_id, name, size, data, creation_time",
         [art.user_id, art.name, art.size, art.data])
     .then(res => res.rows[0])
+    .then(new_art => {
+        if (art.colors && art.colors.length > 0) {
+            linkArtToColor(new_art.id, art.colors);
+        }
+        return new_art;
+    })
 }
 
 const updateArt = (art) => {
@@ -60,6 +72,7 @@ module.exports = {
     findArtByUserId,
     findArtByColorId,
     searchArt,
+    linkArtToColor,
     createArt,
     updateArt,
     deleteArt,

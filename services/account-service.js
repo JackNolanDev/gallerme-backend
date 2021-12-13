@@ -1,4 +1,6 @@
 const serviceUtil = require("../util/service-utils");
+const artDao = require("../daos/art-dao");
+const colorDao = require("../daos/color-dao");
 const userDao = require("../daos/user-dao");
 
 const signup = (req, res) => {
@@ -59,9 +61,35 @@ const currentUser = (req, res) => {
     }
 }
 
+const accountColors = (req, res) => {
+    if (!serviceUtil.isLoggedIn(req)) {
+        res.success([]);
+    }
+    colorDao.findColorsByUserId(req.session.user.id)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
+const accountArt = (req, res) => {
+    if (!serviceUtil.isLoggedIn(req)) {
+        res.success([]);
+    }
+    artDao.findArtByUserId(req.session.user.id)
+    .then(result => serviceUtil.success(res, result))
+    .catch(e => {
+        console.error(e.stack);
+        res.sendStatus(500);
+    });
+}
+
 module.exports = (app) => {
     app.get("/api/account", currentUser);
     app.post("/api/account/signup", signup);
     app.post("/api/account/login", login);
     app.post("/api/account/logout", logout);
+    app.get("/api/account/colors", accountColors);
+    app.get("/api/account/art", accountArt);
 }
