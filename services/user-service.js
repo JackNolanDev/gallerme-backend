@@ -88,8 +88,18 @@ const updateUser = (req, res) => {
         return;
     }
 
+    let updateSession = false;
+    if (req.session.user.id === user.id) {
+        updateSession = true;
+    }
+
     userDao.updateUser(user)
-    .then(result => serviceUtil.success(res, result))
+    .then(result => {
+        if (updateSession) {
+            req.session.user = user;
+        }
+        serviceUtil.success(res, result)
+    })
     .catch(e => {
         console.error(e.stack);
         res.sendStatus(500);
@@ -103,14 +113,14 @@ const deleteUser = (req, res) => {
         return;
     }
 
-    let deleteSessionUser = false;
-    if (req.session.user.id === user.id) {
-        deleteSessionUser = true;
+    let deleteSession = false;
+    if (req.session.user.id === id) {
+        deleteSession = true;
     }
 
     userDao.deleteUser(id)
     .then(result => {
-        if (deleteSessionUser) {
+        if (deleteSession) {
             req.session.destroy();
         }
         serviceUtil.success(res, result)
