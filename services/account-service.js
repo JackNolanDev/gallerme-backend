@@ -87,6 +87,24 @@ const accountArt = (req, res) => {
     });
 }
 
+const homeArt = (req, res) => {
+    if (!serviceUtil.isLoggedIn(req)) {
+        artDao.mostRecentArt()
+        .then(result => serviceUtil.success(res, result))
+        .catch(e => {
+            console.error(e.stack);
+            res.sendStatus(500);
+        });
+    } else {
+        artDao.mostRecentArtForUser(req.session.user.id)
+        .then(result => serviceUtil.success(res, result))
+        .catch(e => {
+            console.error(e.stack);
+            res.sendStatus(500);
+        });
+    }
+}
+
 module.exports = (app) => {
     app.get("/api/account", currentUser);
     app.post("/api/account/signup", signup);
@@ -94,4 +112,5 @@ module.exports = (app) => {
     app.post("/api/account/logout", logout);
     app.get("/api/account/colors", accountColors);
     app.get("/api/account/art", accountArt);
+    app.get("/api/account/art/home", homeArt);
 }

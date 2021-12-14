@@ -16,7 +16,7 @@ const getAllUsers = (req, res) => {
 
 const getUserByArtId = (req, res) => {
     const id = req.params.id;
-    if (serviceUtil.validateUser(req, res, id)) {
+    if (serviceUtil.validateID(res, id)) {
         return;
     }
     userDao.findUserByArtId(id, serviceUtil.isUserOrAdmin(req, id))
@@ -29,11 +29,10 @@ const getUserByArtId = (req, res) => {
 
 const getUserByColorId = (req, res) => {
     const id = req.params.id;
-    // can only see user info when at least logged in
-    if (serviceUtil.validateLoggedIn(req, res)) {
+    if (serviceUtil.validateID(res, id)) {
         return;
     }
-    userDao.findUserByColorId(id, serviceUtil.isAdmin(req))
+    userDao.findUserByColorId(id, serviceUtil.isUserOrAdmin(req, id))
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
         console.error(e.stack);
@@ -43,11 +42,10 @@ const getUserByColorId = (req, res) => {
 
 const getUserById = (req, res) => {
     const id = req.params.id;
-    // can only see user info when at least logged in
-    if (serviceUtil.validateLoggedIn(req, res)) {
+    if (serviceUtil.validateID(res, id)) {
         return;
     }
-    userDao.findUserById(id, serviceUtil.isAdmin(req))
+    userDao.findUserById(id, serviceUtil.isUserOrAdmin(req, id))
     .then(result => serviceUtil.success(res, result))
     .catch(e => {
         console.error(e.stack);

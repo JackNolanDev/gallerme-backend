@@ -25,7 +25,9 @@ app.use(function(req, res, next) {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.enable("trust proxy");
+if (isProd) {
+    app.enable("trust proxy");
+}
 
 // INIT SESSION
 const secret = isProd ? process.env.SESSION_SECRET : "development secret";
@@ -37,7 +39,11 @@ app.use(session({
         pool,
         createTableIfMissing: true,
     }),
-    cookie: { httpOnly: true, secure: true, sameSite: "none" }
+    cookie: {
+        httpOnly: isProd,
+        secure: isProd,
+        sameSite: isProd ? "none" : false,
+    },
    }));
 
 app.get('/ping', (req, res) => {

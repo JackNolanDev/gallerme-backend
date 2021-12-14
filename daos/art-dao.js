@@ -66,6 +66,26 @@ const deleteArt = (id) => {
     return pool.query("DELETE FROM art WHERE id = $1", [id])
 }
 
+const mostRecentArt = () => {
+    return pool.query(
+        "SELECT id, user_id, name, size, data, creation_time "
+        + "FROM art "
+        + "ORDER BY creation_time DESC "
+        + "LIMIT 50")
+    .then(res => res.rows)
+}
+
+const mostRecentArtForUser = (user_id) => {
+    return pool.query(
+        "SELECT id, user_id, name, size, data, creation_time "
+        + "FROM art "
+        + "WHERE user_id = $1 "
+        + "ORDER BY creation_time DESC "
+        + "LIMIT 50",
+        [user_id])
+    .then(res => res.rows)
+}
+
 module.exports = {
     findAllArt,
     findArtById,
@@ -76,4 +96,6 @@ module.exports = {
     createArt,
     updateArt,
     deleteArt,
+    mostRecentArt,
+    mostRecentArtForUser,
 }
