@@ -44,4 +44,4 @@ The easiest way to view the full relationships of the data models is on the [adm
 1. Setup your postgres database locally. The name of the database should be `gallerme`.
 2. Import the schema and sample data from the dump in the database folder.
 3. Start the server using `node server.js` which will get the server running on port 5000.
-4. Start the (frontend)[https://github.com/JackNolanDev/gallerme-frontend] server using `yarn serve`.
+4. Start the [frontend](https://github.com/JackNolanDev/gallerme-frontend) server using `yarn serve`.
