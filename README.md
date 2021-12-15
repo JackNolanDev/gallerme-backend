@@ -35,7 +35,7 @@ The `colors` data model contains information about colors saved during the creat
 
 There is a many to many relationship between the `art` and `colors` data models because each piece of art may have many colors, and each color may be used in multiple pieces of art. This connection is maintained by the `color_art_index` table.
 
-The easiest way to view the full relationships of the data models is on the (admin pages)[https://gallerme.github.io/#/admin]. However, these pages are only available to admins. If you want to see the admin pages, contact me and I can make you an admin briefly using the admin pages myself. On the admin pages, there are distinct pages for listing all the art / colors / users and the pages for creating new / editing / deleting old data objects.
+The easiest way to view the full relationships of the data models is on the [admin pages](https://gallerme.github.io/#/admin). However, these pages are only available to admins. If you want to see the admin pages, contact me and I can make you an admin briefly using the admin pages myself. On the admin pages, there are distinct pages for listing all the art / colors / users and the pages for creating new / editing / deleting old data objects.
 
 ---
 
